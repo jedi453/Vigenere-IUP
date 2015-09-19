@@ -25,78 +25,22 @@ void enAutokey( const char *pt, const char *key, char *ct );
 void deAutokey( const char *ct, const char *key, char *pt );
 
 
-/** Calback for "Clear Fields" Button */
-int btnClear_cb( Ihandle *btnClear ) {
-  /* Get the Text Fields to Clear */
-  Ihandle *inTextField = (Ihandle*) IupGetAttribute(btnClear, "INPUT_TEXT");
-  Ihandle *keyTextField = (Ihandle*) IupGetAttribute(btnClear, "KEY_TEXT");
-  Ihandle *outTextField = (Ihandle*) IupGetAttribute(btnClear, "OUTPUT_TEXT");
-
-  /* Clear the Text Fields */
-  IupSetAttribute(inTextField, "VALUE", "");
-  IupSetAttribute(keyTextField, "VALUE", "");
-  IupSetAttribute(outTextField, "VALUE", "");
-
-  return IUP_DEFAULT;
-}
-
 /** Callback for "Encrypt (Vigenere)" Button */
 int enVigenere_cb( Ihandle *btnEnVigenere ) {
-  Ihandle *inTextField = (Ihandle*) IupGetAttribute(btnEnVigenere, "INPUT_TEXT");
-  Ihandle *keyTextField = (Ihandle*) IupGetAttribute(btnEnVigenere, "KEY_TEXT");
-  Ihandle *outTextField = (Ihandle*) IupGetAttribute(btnEnVigenere, "OUTPUT_TEXT");
-  const char *plainText = IupGetAttribute(inTextField, "VALUE");
-  const char *keyText = IupGetAttribute(keyTextField, "VALUE");
-  char *outText;
-  size_t ptSize = IupGetInt(inTextField, "COUNT");
- 
-  /* Allocate Temporary Memory For Output */
-  outText = (char*) malloc((ptSize+1) * sizeof(char));
+  Ihandle *plainTextField = IupGetAttribute(btnEnVigenere, "INPUT_TEXT");
+  Ihandle *keyTextField = IupGetAttribute(btnEnVigenere, "KEY_TEXT");
+  Ihandle *cipherTextField = IupGetAttribute(btnEnVigenere, "OUTPUT_TEXT");
+  const char *plainText = IupGetAttribute(plainTextField, "VALUE");
 
-  if ( outText != NULL ) {
-    /* Encrypt the Given plainText with the Given keyText */
-    enVigenere(plainText, keyText, outText);
-
-    /* Copy the Result to the outTextField */
-    IupSetStrAttribute(outTextField, "VALUE", outText);
-
-    /* Done With outText */
-    free(outText);
-  } 
-
+  IupSetAttribute(plainText, "VALUE", "HELLO!");
+  IupMessage("ALERT", "TODO");
   return IUP_DEFAULT;
 }
 
 
 /** Callback for "Decrypt (Vigenere)" Button */
 int deVigenere_cb( Ihandle *btnDeVigenere ) {
-  Ihandle *inTextField, *keyTextField, *outTextField;
-  const char *cipherText;
-  const char *keyText;
-  char *plainText;
-  size_t inSize; /* The Size of the String in inTextField */
-  
-  inTextField = (Ihandle*) IupGetAttribute(btnDeVigenere, "INPUT_TEXT");
-  keyTextField = (Ihandle*) IupGetAttribute(btnDeVigenere, "KEY_TEXT");
-  outTextField = (Ihandle*) IupGetAttribute(btnDeVigenere, "OUTPUT_TEXT");
-
-  cipherText = IupGetAttribute(inTextField, "VALUE");
-  keyText = IupGetAttribute(keyTextField, "VALUE");
-  inSize = IupGetInt(inTextField, "COUNT");
-
-  /* Allocate Output String */
-  plainText = (char*) malloc( (inSize+1) * sizeof(char) );
-
-  if ( plainText != NULL ) {
-    /* Decrypt the Given cipherText With Given keyText */
-    deVigenere(cipherText, keyText, plainText);
-
-    /* Copy Result to ouTextField */
-    IupSetStrAttribute(outTextField, "VALUE", plainText);
-
-    free( plainText );
-  }
-
+  IupMessage("ALERT", "TODO");
   return IUP_DEFAULT;
 }
 
@@ -124,20 +68,28 @@ int main( int argc, char **argv ) {
   Ihandle *dlg;
   Ihandle *inText, *keyText, *outText, *vbox, *vigenereHbox, *autokeyHbox;
   Ihandle *btnEnVigenere, *btnDeVigenere, *btnEnAutokey, *btnDeAutokey;
-  Ihandle *btnClear;
 
-  /************************ DEBUG -- TODO -- REMOVE ********************/
-  char pt[1024] = "Squidward Tentacles";
-  char key[1024] = "Chickens";
-  char ct[1024] = "";
+  /* BEGIN - TODO REMOVE DEBUG */
+  char pt[STR_LEN+1] = "Squidward Tentacles";
+  char key[STR_LEN+1] = "Chickens";
+  char ct[STR_LEN+1];
 
-  printf(" Plaintext: %s\n", pt );
-  printf("       Key: %s\n", key );
+  printf(" Plaintext: %s\n", pt);
+  printf("       Key: %s\n", key);
   enVigenere(pt, key, ct);
-  printf("CipherText: %s\n", ct );
+  printf("CipherText: %s\n", ct);
+  puts("Decrypting:");
   deVigenere(ct, key, pt);
-  printf(" Decrypted: %s\n\n", pt );
-  /************************ END DEBUG -- TODO -- REMOVE ********************/
+  printf(" Plaintext: %s\n", pt);
+  puts("\nUsing Autokey:");
+  printf(" Plaintext: %s\n", pt);
+  printf("       Key: %s\n", key);
+  enAutokey(pt, key, ct);
+  printf("Ciphertext: %s\n", ct);
+  puts("Decrypting:");
+  deAutokey(ct, key, pt);
+  printf(" Plaintext: %s\n", pt);
+  /* END - TODO REMOVE DEBUG */
 
   /* Start IUP */
   IupOpen( &argc, &argv );
@@ -157,14 +109,10 @@ int main( int argc, char **argv ) {
   btnDeVigenere = IupButton("Decrypt Vigenere", NULL);
   btnEnAutokey = IupButton("Encrypt Autokey", NULL);
   btnDeAutokey = IupButton("Decrypt Autokey", NULL);
-
-  btnClear = IupButton("Clear Fields", NULL);
-
   IupSetCallback(btnEnVigenere, "ACTION", (Icallback)enVigenere_cb);
   IupSetCallback(btnDeVigenere, "ACTION", (Icallback)deVigenere_cb);
   IupSetCallback(btnEnAutokey, "ACTION", (Icallback)enAutokey_cb);
   IupSetCallback(btnDeAutokey, "ACTION", (Icallback)deAutokey_cb);
-  IupSetCallback(btnClear, "ACTION", (Icallback)btnClear_cb);
 
   /* Create Container Boxes */
   vigenereHbox = IupHbox(
@@ -181,8 +129,6 @@ int main( int argc, char **argv ) {
       outText,
       vigenereHbox,
       autokeyHbox,
-      IupFill(),
-      btnClear,
       NULL );
   IupSetAttribute(vbox, "ALIGNMENT", "ACENTER");
   

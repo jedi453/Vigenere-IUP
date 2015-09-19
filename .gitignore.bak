@@ -1,0 +1,7 @@
+*.o
+*.so
+*.swp
+*.swo
+iup
+iup/*
+Vigenere-IUP
