@@ -1,6 +1,8 @@
 /** File: vigenere.c
  *
  *  Vigenere and Autokey Cipher Implementation Functions
+ *
+ *  LICENSE: MIT - See LICENSE File
  */
 
 
