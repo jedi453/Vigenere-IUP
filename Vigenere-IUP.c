@@ -11,11 +11,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h> /* TODO REMOVE DEBUG */
 #include <iup.h>
 
 
-#define STR_LEN 1023 /* TODO REMOVE DEBUG */
 
 
 /** Declare Functions to Encrypt/Decrypt */
@@ -103,14 +101,72 @@ int deVigenere_cb( Ihandle *btnDeVigenere ) {
 
 /** Callback for "Encrypt (Autokey)" Button */
 int enAutokey_cb( Ihandle *btnEnAutokey ) {
-  IupMessage("ALERT", "TODO");
+  Ihandle *inTextField, *keyTextField, *outTextField;
+  const char *plainText;
+  const char *keyText;
+  char *cipherText;
+  size_t inSize; /* The Size of the String in inTextField */
+
+  /* Get Text Field Elements */
+  inTextField = (Ihandle*) IupGetAttribute(btnEnAutokey, "INPUT_TEXT");
+  keyTextField = (Ihandle*) IupGetAttribute(btnEnAutokey, "KEY_TEXT");
+  outTextField = (Ihandle*) IupGetAttribute(btnEnAutokey, "OUTPUT_TEXT");
+
+  /* Get Text Field Contents */
+  plainText = IupGetAttribute(inTextField, "VALUE");
+  keyText = IupGetAttribute(keyTextField, "VALUE");
+  inSize = IupGetInt(inTextField, "COUNT");
+
+  cipherText = (char*) malloc( (inSize+1) * sizeof(char) );
+
+  if ( cipherText != NULL ) {
+    /* Encrypt the Given Plaintext With the Given Key */
+    enAutokey(plainText, keyText, cipherText);
+
+    /* Set the Result as the Contents to the Output Text Field */
+    IupSetStrAttribute(outTextField, "VALUE", cipherText);
+
+    /* Free the Dynamically Allocated Memory */
+    free( cipherText );
+  }
+
   return IUP_DEFAULT;
 }
 
 
 /** Callback for "Decrypt (Autokey)" Button */
 int deAutokey_cb( Ihandle *btnDeAutokey ) {
-  IupMessage("ALERT", "TODO");
+  Ihandle *inTextField, *keyTextField, *outTextField;
+  const char *cipherText;
+  const char *keyText;
+  char *plainText;
+  size_t inSize; /* The Number of chars in The Input */
+
+  /* Get Text Field Elements */
+  inTextField = (Ihandle*) IupGetAttribute(btnDeAutokey, "INPUT_TEXT");
+  keyTextField = (Ihandle*) IupGetAttribute(btnDeAutokey, "KEY_TEXT");
+  outTextField = (Ihandle*) IupGetAttribute(btnDeAutokey, "OUTPUT_TEXT");
+
+  /* Get Text Field Contents */
+  cipherText = IupGetAttribute(inTextField, "VALUE");
+  keyText = IupGetAttribute(keyTextField, "VALUE");
+  inSize = IupGetInt(inTextField, "COUNT");
+
+  /* Allocate Memory for the Output */
+  plainText = (char*) malloc( (inSize+1) * sizeof(char) );
+
+  /* If Memory was Allocated Successfully, Decipher Text and Show Result */
+  if ( plainText != NULL ) {
+    /* Decrypt */
+    deAutokey( cipherText, keyText, plainText );
+
+    /* Fill the Output Field with the Result */
+    IupSetStrAttribute( outTextField, "VALUE", plainText );
+
+    /* Free Dynamically Allocated Memory */
+    free( plainText );
+  }
+
   return IUP_DEFAULT;
 }
 
@@ -125,19 +181,6 @@ int main( int argc, char **argv ) {
   Ihandle *inText, *keyText, *outText, *vbox, *vigenereHbox, *autokeyHbox;
   Ihandle *btnEnVigenere, *btnDeVigenere, *btnEnAutokey, *btnDeAutokey;
   Ihandle *btnClear;
-
-  /************************ DEBUG -- TODO -- REMOVE ********************/
-  char pt[1024] = "Squidward Tentacles";
-  char key[1024] = "Chickens";
-  char ct[1024] = "";
-
-  printf(" Plaintext: %s\n", pt );
-  printf("       Key: %s\n", key );
-  enVigenere(pt, key, ct);
-  printf("CipherText: %s\n", ct );
-  deVigenere(ct, key, pt);
-  printf(" Decrypted: %s\n\n", pt );
-  /************************ END DEBUG -- TODO -- REMOVE ********************/
 
   /* Start IUP */
   IupOpen( &argc, &argv );
@@ -193,7 +236,6 @@ int main( int argc, char **argv ) {
   IupSetAttribute(dlg, "INPUT_TEXT", (char*)inText);
   IupSetAttribute(dlg, "KEY_TEXT", (char*)keyText);
   IupSetAttribute(dlg, "OUTPUT_TEXT", (char*)outText);
-  IupSetAttribute(inText, "VALUE", "HELLO FROM MAIN!");
 
   /* Show Main Dialog/Window */
   IupShowXY(dlg, IUP_CENTER, IUP_CENTER);
